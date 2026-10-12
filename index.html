@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#07070b">
+<title>Aesthetic Pro</title>
+<style>
+  :root{
+    --bg:#07070b; --bg2:#0d0d14; --card:rgba(20,20,32,.72); --card-solid:#14141f;
+    --border:rgba(80,80,120,.28); --border-strong:rgba(120,120,180,.4);
+    --text:#eef0f6; --muted:#8b8ba8; --muted2:#5a5a75;
+    --purple:#8b5cf6; --cyan:#22d3ee; --pink:#f472b6;
+    --green:#10b981; --amber:#f59e0b; --red:#ef4444; --blue:#3b82f6;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',Roboto,sans-serif;min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased;overscroll-behavior-y:contain}
+  body::before,body::after{content:'';position:fixed;width:75%;height:75%;pointer-events:none;z-index:0;filter:blur(70px);opacity:.5}
+  body::before{top:-35%;left:-35%;background:radial-gradient(circle,rgba(139,92,246,.5),transparent 60%)}
+  body::after{bottom:-35%;right:-35%;background:radial-gradient(circle,rgba(34,211,238,.4),transparent 60%)}
+  #auth-screen{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:32px 22px calc(32px + env(safe-area-inset-bottom));max-width:480px;margin:0 auto}
+  .auth-logo{text-align:center;margin-bottom:36px}
+  .auth-logo .mark{width:72px;height:72px;border-radius:22px;margin:0 auto 16px;background:linear-gradient(135deg,var(--purple),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:34px;box-shadow:0 12px 40px rgba(139,92,246,.45)}
+  .auth-logo h1{font-size:30px;font-weight:800;letter-spacing:-.8px;margin-bottom:6px;background:linear-gradient(135deg,#fff,#9d9db8);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .auth-logo p{color:var(--muted);font-size:13px}
+  .auth-tabs{display:flex;background:rgba(255,255,255,.04);border-radius:14px;padding:4px;margin-bottom:20px;border:1px solid var(--border)}
+  .auth-tabs button{flex:1;padding:11px;background:transparent;border:none;color:var(--muted);font-size:14px;font-weight:700;border-radius:11px;cursor:pointer;font-family:inherit;transition:all .25s}
+  .auth-tabs button.active{background:linear-gradient(135deg,var(--purple),var(--cyan));color:#fff;box-shadow:0 4px 16px rgba(139,92,246,.4)}
+  .field{margin-bottom:14px}
+  .field label{display:block;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+  .field input{width:100%;padding:15px 16px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:14px;color:var(--text);font-size:15px;font-family:inherit;transition:border-color .2s,background .2s;-webkit-appearance:none}
+  .field input:focus{outline:none;border-color:var(--purple);background:rgba(139,92,246,.06)}
+  .btn{display:block;width:100%;padding:16px;border:none;border-radius:16px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;transition:transform .15s ease,opacity .2s}
+  .btn:active{transform:scale(.97)}
+  .btn-primary{background:linear-gradient(135deg,var(--purple),var(--cyan));color:#fff;box-shadow:0 8px 28px rgba(139,92,246,.4)}
+  .btn-ghost{background:rgba(255,255,255,.05);color:var(--text);border:1px solid var(--border)}
+  .btn-danger{background:rgba(239,68,68,.12);color:#fca5a5;border:1px solid rgba(239,68,68,.3)}
+  .auth-switch{text-align:center;margin-top:20px;color:var(--muted);font-size:13px}
+  .msg{padding:12px 14px;border-radius:12px;font-size:13px;margin-bottom:14px;line-height:1.5}
+  .msg.error{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:#fca5a5}
+  .msg.success{background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);color:#6ee7b7}
+  #app-screen{position:relative;z-index:1;display:none;min-height:100vh;padding-bottom:calc(84px + env(safe-area-inset-bottom))}
+  .app-header{position:sticky;top:0;z-index:50;padding:16px 20px calc(16px + env(safe-area-inset-top)) 20px;background:rgba(7,7,11,.85);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;max-width:560px;margin:0 auto}
+  .app-header .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:16px;letter-spacing:-.3px}
+  .brand-mark{width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,var(--purple),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 4px 14px rgba(139,92,246,.4)}
+  .user-chip{display:flex;align-items:center;gap:8px;padding:6px 12px 6px 6px;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:999px;font-size:12px;font-weight:600}
+  .avatar{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff}
+  .content{max-width:560px;margin:0 auto;padding:20px 18px}
+  .tab-content{display:none;animation:fadeIn .3s ease}
+  .tab-content.active{display:block}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  .page-title{font-size:24px;font-weight:800;letter-spacing:-.6px;margin-bottom:4px}
+  .page-sub{color:var(--muted);font-size:13px;margin-bottom:22px;line-height:1.5}
+  .bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:100;background:rgba(10,10,16,.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-top:1px solid var(--border);padding:10px 8px calc(10px + env(safe-area-inset-bottom));display:flex;justify-content:space-around;max-width:560px;margin:0 auto}
+  .nav-item{flex:1;background:transparent;border:none;color:var(--muted2);display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 4px;cursor:pointer;font-family:inherit;transition:color .2s;position:relative}
+  .nav-item .icon{font-size:20px;transition:transform .25s}
+  .nav-item .label{font-size:10px;font-weight:700;letter-spacing:.3px}
+  .nav-item.active{color:var(--cyan)}
+  .nav-item.active .icon{transform:scale(1.12) translateY(-1px)}
+  .nav-item.active::before{content:'';position:absolute;top:-10px;width:22px;height:3px;border-radius:0 0 3px 3px;background:linear-gradient(90deg,var(--purple),var(--cyan))}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:18px;margin-bottom:14px;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+  .section-title{font-size:11px;font-weight:800;letter-spacing:2.2px;text-transform:uppercase;color:var(--muted);margin:22px 4px 12px}
+  .section-title:first-child{margin-top:0}
+  .divider{height:1px;background:var(--border);margin:14px 0}
+  .upload-zone{border:2px dashed rgba(120,120,160,.35);border-radius:22px;padding:38px 20px;text-align:center;cursor:pointer;transition:all .3s cubic-bezier(.4,0,.2,1);background:linear-gradient(135deg,rgba(139,92,246,.06),rgba(34,211,238,.06));position:relative;overflow:hidden}
+  .upload-zone:active{transform:scale(.985);border-color:var(--purple)}
+  .upload-icon{font-size:48px;display:block;margin-bottom:14px;filter:drop-shadow(0 6px 20px rgba(139,92,246,.4));animation:float 3s ease-in-out infinite}
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+  .upload-title{font-size:16px;font-weight:700;margin-bottom:6px}
+  .upload-hint{font-size:13px;color:var(--muted)}
+  input[type=file]{display:none}
+  #preview-wrap{display:none;position:relative;border-radius:20px;overflow:hidden;background:#000;margin-bottom:16px}
+  #preview-canvas{display:block;width:100%;height:auto}
+  #loading{display:none;flex-direction:column;align-items:center;gap:14px;padding:40px 0}
+  .spinner{width:52px;height:52px;border-radius:50%;border:3px solid rgba(255,255,255,.08);border-top-color:var(--purple);border-right-color:var(--cyan);animation:spin .9s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .loading-text{color:var(--muted);font-size:13px;letter-spacing:.5px}
+  .hero{text-align:center;padding:28px 20px 24px;background:linear-gradient(135deg,rgba(139,92,246,.12),rgba(34,211,238,.08));border:1px solid var(--border);border-radius:24px;margin-bottom:16px;position:relative;overflow:hidden}
+  .ring-wrap{position:relative;width:180px;height:180px;margin:0 auto 16px}
+  .ring-wrap svg{width:100%;height:100%;transform:rotate(-90deg)}
+  .ring-bg{fill:none;stroke:rgba(255,255,255,.05);stroke-width:10}
+  .ring-fg{fill:none;stroke:url(#ringGrad);stroke-width:10;stroke-linecap:round;filter:drop-shadow(0 0 10px rgba(139,92,246,.6));transition:stroke-dashoffset 1.6s cubic-bezier(.4,0,.2,1)}
+  .ring-value{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:48px;font-weight:800;letter-spacing:-2px;background:linear-gradient(135deg,#fff,var(--cyan));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;line-height:1}
+  .tier-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 18px;border-radius:999px;font-size:12px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);margin-top:6px}
+  .tier-badge .dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:pulse 2s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+  .tier-desc{color:var(--muted);font-size:13px;margin-top:10px;line-height:1.5}
+  .category-head{font-size:13px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--cyan);margin:20px 4px 10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+  .metric-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:16px;margin-bottom:10px;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);animation:slideIn .5s cubic-bezier(.4,0,.2,1) backwards}
+  @keyframes slideIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+  .metric-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:10px}
+  .metric-left{display:flex;align-items:center;gap:10px;min-width:0}
+  .metric-emoji{font-size:20px;flex-shrink:0}
+  .metric-name{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .metric-right{display:flex;align-items:baseline;gap:2px;flex-shrink:0}
+  .metric-score{font-size:20px;font-weight:800;letter-spacing:-.5px}
+  .metric-max{font-size:11px;color:var(--muted);font-weight:600}
+  .bar{height:7px;background:rgba(255,255,255,.05);border-radius:99px;overflow:hidden}
+  .bar-fill{height:100%;border-radius:99px;width:0;transition:width 1.2s cubic-bezier(.4,0,.2,1);box-shadow:0 0 12px currentColor}
+  .metric-desc{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.5}
+  .insight{display:flex;gap:12px;padding:14px 16px;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid var(--border);margin-bottom:10px}
+  .insight-icon{font-size:20px;flex-shrink:0;line-height:1}
+  .insight-label{font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+  .insight-text{font-size:13px;line-height:1.55}
+  .tip-accordion{background:var(--card);border:1px solid var(--border);border-radius:18px;margin-bottom:10px;overflow:hidden;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+  .tip-head{display:flex;align-items:center;gap:12px;padding:16px;cursor:pointer;transition:background .2s}
+  .tip-head:active{background:rgba(255,255,255,.03)}
+  .tip-head .emoji{font-size:22px;flex-shrink:0}
+  .tip-head .title-wrap{flex:1;min-width:0}
+  .tip-head .title{font-size:15px;font-weight:700;margin-bottom:2px}
+  .tip-head .sub{font-size:11px;color:var(--muted);letter-spacing:.3px}
+  .tip-head .chev{font-size:14px;color:var(--muted);transition:transform .3s}
+  .tip-accordion.open .tip-head .chev{transform:rotate(180deg)}
+  .tip-body{max-height:0;overflow:hidden;transition:max-height .4s cubic-bezier(.4,0,.2,1)}
+  .tip-accordion.open .tip-body{max-height:1400px}
+  .tip-inner{padding:14px 16px 18px;border-top:1px solid var(--border)}
+  .tip-block{margin-bottom:16px}
+  .tip-block:last-child{margin-bottom:0}
+  .tip-block h4{font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--cyan);margin-bottom:8px}
+  .tip-block p{font-size:13px;color:var(--muted);line-height:1.6}
+  .tip-block ul{list-style:none;padding:0}
+  .tip-block li{font-size:13px;line-height:1.55;color:var(--text);padding:8px 0 8px 24px;position:relative;border-bottom:1px solid rgba(255,255,255,.04)}
+  .tip-block li:last-child{border-bottom:none}
+  .tip-block li::before{content:'→';position:absolute;left:0;color:var(--purple);font-weight:800}
+  .tip-filter{display:flex;gap:6px;overflow-x:auto;padding:0 0 14px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .tip-filter::-webkit-scrollbar{display:none}
+  .tip-filter button{flex-shrink:0;padding:8px 14px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap}
+  .tip-filter button.active{background:linear-gradient(135deg,var(--purple),var(--cyan));color:#fff;border-color:transparent}
+  .note-input-wrap{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:14px;margin-bottom:14px}
+  .note-input-wrap textarea{width:100%;background:transparent;border:none;color:var(--text);font-size:14px;font-family:inherit;resize:vertical;min-height:80px;line-height:1.55;outline:none}
+  .note-input-wrap textarea::placeholder{color:var(--muted2)}
+  .note-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:8px}
+  .note-actions button{padding:9px 18px;border-radius:12px;border:none;cursor:pointer;font-size:13px;font-weight:700;font-family:inherit}
+  .note-actions .save{background:linear-gradient(135deg,var(--purple),var(--cyan));color:#fff}
+  .note-actions .cancel{background:rgba(255,255,255,.06);color:var(--text);border:1px solid var(--border)}
+  .note-item{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px 16px;margin-bottom:10px;animation:slideIn .4s ease backwards}
+  .note-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.3px}
+  .note-text{font-size:14px;line-height:1.55;color:var(--text);word-break:break-word;white-space:pre-wrap}
+  .note-btns{display:flex;gap:8px;margin-top:10px}
+  .note-btns button{padding:6px 12px;border-radius:10px;font-size:11px;font-weight:700;background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-family:inherit}
+  .note-btns .del{color:#fca5a5;border-color:rgba(239,68,68,.25)}
+  .empty-state{text-align:center;padding:36px 20px;color:var(--muted);font-size:13px;line-height:1.6}
+  .empty-state .big{font-size:38px;display:block;margin-bottom:12px;opacity:.6}
+  .profile-hero{background:linear-gradient(135deg,rgba(139,92,246,.15),rgba(34,211,238,.08));border:1px solid var(--border);border-radius:22px;padding:24px 20px;text-align:center;margin-bottom:16px}
+  .profile-avatar{width:70px;height:70px;border-radius:22px;margin:0 auto 14px;background:linear-gradient(135deg,var(--purple),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;color:#fff;box-shadow:0 10px 30px rgba(139,92,246,.4)}
+  .profile-hero h2{font-size:20px;font-weight:800;margin-bottom:4px}
+  .profile-hero p{color:var(--muted);font-size:13px}
+  .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+  .stat-box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px;text-align:center}
+  .stat-box .num{font-size:22px;font-weight:800;letter-spacing:-.5px;background:linear-gradient(135deg,var(--purple),var(--cyan));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .stat-box .lbl{font-size:11px;color:var(--muted);font-weight:600;margin-top:4px;letter-spacing:.3px}
+  .menu-item{display:flex;align-items:center;gap:14px;padding:16px;background:var(--card);border:1px solid var(--border);border-radius:16px;margin-bottom:10px;cursor:pointer;transition:transform .15s,background .15s}
+  .menu-item:active{transform:scale(.99);background:rgba(255,255,255,.04)}
+  .menu-item .ico{width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;background:rgba(139,92,246,.12)}
+  .menu-item .ico.danger{background:rgba(239,68,68,.12)}
+  .menu-item .txt{flex:1;min-width:0}
+  .menu-item .txt .t{font-size:14px;font-weight:700;margin-bottom:2px}
+  .menu-item .txt .s{font-size:12px;color:var(--muted)}
+  .menu-item .arr{color:var(--muted);font-size:14px}
+  .hist-item{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:transform .15s}
+  .hist-item:active{transform:scale(.99)}
+  .hist-score{width:52px;height:52px;border-radius:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:#fff;position:relative;overflow:hidden}
+  .hist-info{flex:1;min-width:0}
+  .hist-info .tier{font-size:14px;font-weight:700;margin-bottom:3px}
+  .hist-info .date{font-size:11px;color:var(--muted)}
+  .hist-thumb{width:44px;height:44px;border-radius:10px;object-fit:cover;flex-shrink:0;border:1px solid var(--border)}
+  .modal-backdrop{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:none;align-items:flex-end;justify-content:center;animation:fadeIn .25s ease}
+  .modal-backdrop.active{display:flex}
+  .modal{background:var(--card-solid);border:1px solid var(--border);border-radius:24px 24px 0 0;width:100%;max-width:560px;padding:24px 20px calc(24px + env(safe-area-inset-bottom));max-height:88vh;overflow-y:auto;animation:slideUp .35s cubic-bezier(.4,0,.2,1)}
+  @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+  .modal h3{font-size:20px;font-weight:800;margin-bottom:8px}
+  .modal p{color:var(--muted);font-size:13px;line-height:1.55;margin-bottom:16px}
+  .modal .btn{margin-top:10px}
+  .detail-img{width:100%;border-radius:16px;margin-bottom:16px;background:#000}
+  .footer{color:var(--muted2);font-size:11px;text-align:center;margin-top:24px;line-height:1.7;padding:0 10px}
+  .toast{position:fixed;bottom:calc(100px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%) translateY(20px);background:rgba(30,30,45,.98);border:1px solid var(--border-strong);padding:12px 20px;border-radius:14px;font-size:13px;font-weight:600;color:var(--text);z-index:300;opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;box-shadow:0 10px 30px rgba(0,0,0,.5);backdrop-filter:blur(20px);max-width:90vw}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .toast.error{background:rgba(60,20,25,.98);border-color:rgba(239,68,68,.4);color:#fca5a5}
+  .toast.success{background:rgba(15,50,35,.98);border-color:rgba(16,185,129,.4);color:#6ee7b7}
+</style>
+</head>
+<body>
+
+<div id="auth-screen">
+  <div class="auth-logo">
+    <div class="mark">✨</div>
+    <h1>Aesthetic Pro</h1>
+    <p>30 Metriken · Komplette Gesichtsanalyse</p>
+  </div>
+  <div class="auth-tabs">
+    <button class="active" data-authtab="login">Anmelden</button>
+    <button data-authtab="register">Registrieren</button>
+  </div>
+  <div id="auth-msg"></div>
+  <div id="login-form">
+    <div class="field"><label>E-Mail</label><input type="email" id="login-email" placeholder="deine@email.com" autocomplete="email"></div>
+    <div class="field"><label>Passwort</label><input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password"></div>
+    <button class="btn btn-primary" id="login-btn">Anmelden</button>
+  </div>
+  <div id="register-form" style="display:none">
+    <div class="field"><label>Name</label><input type="text" id="reg-name" placeholder="Dein Name" autocomplete="name"></div>
+    <div class="field"><label>E-Mail</label><input type="email" id="reg-email" placeholder="deine@email.com" autocomplete="email"></div>
+    <div class="field"><label>Passwort</label><input type="password" id="reg-password" placeholder="Mindestens 6 Zeichen" autocomplete="new-password"></div>
+    <div class="field"><label>Passwort wiederholen</label><input type="password" id="reg-password2" placeholder="••••••••" autocomplete="new-password"></div>
+    <button class="btn btn-primary" id="register-btn">Konto erstellen</button>
+  </div>
+  <div class="footer" style="margin-top:24px">🔒 Alle Daten werden ausschließlich lokal auf deinem Gerät gespeichert.</div>
+</div>
+
+<div id="app-screen">
+  <div class="app-header">
+    <div class="brand"><div class="brand-mark">✨</div>Aesthetic Pro</div>
+    <div class="user-chip" id="user-chip"><div class="avatar" id="user-avatar">?</div><span id="user-name">User</span></div>
+  </div>
+
+  <div class="content">
+    <section id="tab-scan" class="tab-content active">
+      <h2 class="page-title">Face Scan</h2>
+      <p class="page-sub">30 Metriken · Gewichteter Score · Sofort-Ergebnis.</p>
+      <div id="upload-section">
+        <div class="upload-zone" id="upload-zone">
+          <input type="file" id="file-input" accept="image/*">
+          <span class="upload-icon">📸</span>
+          <div class="upload-title">Foto aufnehmen oder auswählen</div>
+          <div class="upload-hint">Frontal · Neutral · Gutes Licht</div>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <div style="font-size:13px;line-height:1.7;color:var(--muted)">
+            <strong style="color:var(--text)">💡 Für beste Ergebnisse:</strong><br>
+            · Direkt in die Kamera schauen<br>
+            · Neutrale Mimik, Augen offen<br>
+            · Keine Brille, kein Make-up<br>
+            · Gleichmäßiges Licht, kein Schatten<br>
+            · Haare aus dem Gesicht
+          </div>
+        </div>
+      </div>
+      <div id="analysis-section" style="display:none">
+        <div id="preview-wrap"><canvas id="preview-canvas"></canvas></div>
+        <div id="loading"><div class="spinner"></div><div class="loading-text" id="loading-text">Modell wird geladen…</div></div>
+        <div id="current-results"></div>
+        <button class="btn btn-ghost" id="reset-btn" style="display:none;margin-top:6px">← Neues Foto analysieren</button>
+      </div>
+    </section>
+
+    <section id="tab-history" class="tab-content">
+      <h2 class="page-title">Verlauf</h2>
+      <p class="page-sub">Alle deine bisherigen Analysen im Überblick.</p>
+      <div id="history-list"></div>
+    </section>
+
+    <section id="tab-tips" class="tab-content">
+      <h2 class="page-title">Tips & Tricks</h2>
+      <p class="page-sub">Für jede der 30 Metriken – konkret und umsetzbar.</p>
+      <div class="tip-filter" id="tip-filter"></div>
+      <div id="tips-list"></div>
+    </section>
+
+    <section id="tab-notes" class="tab-content">
+      <h2 class="page-title">Notizen</h2>
+      <p class="page-sub">Fortschritte, Routinen und Gedanken festhalten.</p>
+      <div class="note-input-wrap">
+        <textarea id="note-input" placeholder="Neue Notiz schreiben…"></textarea>
+        <div class="note-actions">
+          <button class="cancel" id="note-cancel" style="display:none">Abbrechen</button>
+          <button class="save" id="note-save">Speichern</button>
+        </div>
+      </div>
+      <div id="notes-list"></div>
+    </section>
+
+    <section id="tab-profile" class="tab-content">
+      <h2 class="page-title">Profil</h2>
+      <p class="page-sub">Deine Statistiken und Einstellungen.</p>
+      <div class="profile-hero">
+        <div class="profile-avatar" id="profile-avatar">?</div>
+        <h2 id="profile-name">User</h2>
+        <p id="profile-email">user@email.com</p>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-box"><div class="num" id="stat-scans">0</div><div class="lbl">Scans</div></div>
+        <div class="stat-box"><div class="num" id="stat-notes">0</div><div class="lbl">Notizen</div></div>
+        <div class="stat-box"><div class="num" id="stat-best">–</div><div class="lbl">Bester Score</div></div>
+        <div class="stat-box"><div class="num" id="stat-avg">–</div><div class="lbl">Ø Score</div></div>
+      </div>
+      <div class="section-title">Einstellungen</div>
+      <div class="menu-item" onclick="exportData()">
+        <div class="ico">📤</div><div class="txt"><div class="t">Daten exportieren</div><div class="s">Als JSON-Datei herunterladen</div></div><div class="arr">›</div>
+      </div>
+      <div class="menu-item" onclick="clearHistory()">
+        <div class="ico danger">🗑️</div><div class="txt"><div class="t">Scan-Verlauf löschen</div><div class="s">Alle Analysen entfernen</div></div><div class="arr">›</div>
+      </div>
+      <div class="menu-item" onclick="logout()">
+        <div class="ico danger">🚪</div><div class="txt"><div class="t">Abmelden</div><div class="s">Aus deinem Konto abmelden</div></div><div class="arr">›</div>
+      </div>
+      <div class="footer">Aesthetic Pro · v3.0 · 30 Metriken<br>🔒 Alle Daten lokal gespeichert.<br>Nur zur Unterhaltung.</div>
+    </section>
+  </div>
+
+  <nav class="bottom-nav">
+    <button class="nav-item active" data-tab="scan"><span class="icon">📸</span><span class="label">Scan</span></button>
+    <button class="nav-item" data-tab="history"><span class="icon">📊</span><span class="label">Verlauf</span></button>
+    <button class="nav-item" data-tab="tips"><span class="icon">💡</span><span class="label">Tips</span></button>
+    <button class="nav-item" data-tab="notes"><span class="icon">📝</span><span class="label">Notizen</span></button>
+    <button class="nav-item" data-tab="profile"><span class="icon">👤</span><span class="label">Profil</span></button>
+  </nav>
+</div>
+
+<div class="modal-backdrop" id="modal-backdrop"><div class="modal" id="modal-content"></div></div>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.js"></script>
+<script>
+/* =================== STORAGE =================== */
+const LS={users:'ae_users_v3',session:'ae_session_v3',scans:e=>'ae_scans_'+e,notes:e=>'ae_notes_'+e};
+const db={get:(k,f)=>{try{return JSON.parse(localStorage.getItem(k))??f}catch{return f}},set:(k,v)=>localStorage.setItem(k,JSON.stringify(v)),del:k=>localStorage.removeItem(k)};
+const hash=s=>{let h=0;for(let i=0;i<s.length;i++){h=(h<<5)-h+s.charCodeAt(i);h|=0}return 'h'+h};
+let currentUser=null;
+
+/* =================== AUTH =================== */
+const authScreen=document.getElementById('auth-screen');
+const appScreen=document.getElementById('app-screen');
+const authMsg=document.getElementById('auth-msg');
+function showAuthMsg(t,c='error'){authMsg.innerHTML=`<div class="msg ${c}">${t}</div>`;setTimeout(()=>authMsg.innerHTML='',4000)}
+document.querySelectorAll('[data-authtab]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-authtab]').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.getElementById('login-form').style.display=b.dataset.authtab==='login'?'block':'none';document.getElementById('register-form').style.display=b.dataset.authtab==='register'?'block':'none'});
+document.getElementById('register-btn').onclick=()=>{
+  const name=document.getElementById('reg-name').value.trim(),email=document.getElementById('reg-email').value.trim().toLowerCase(),pw=document.getElementById('reg-password').value,pw2=document.getElementById('reg-password2').value;
+  if(!name)return showAuthMsg('Bitte Namen eingeben.');
+  if(!email||!/^\S+@\S+\.\S+$/.test(email))return showAuthMsg('Ungültige E-Mail.');
+  if(pw.length<6)return showAuthMsg('Passwort min. 6 Zeichen.');
+  if(pw!==pw2)return showAuthMsg('Passwörter stimmen nicht überein.');
+  const users=db.get(LS.users,{});
+  if(users[email])return showAuthMsg('E-Mail bereits registriert.');
+  users[email]={name,email,password:hash(pw),created:Date.now()};
+  db.set(LS.users,users);
+  showAuthMsg('Konto erstellt! Anmeldung…','success');
+  setTimeout(()=>loginUser(email),700);
+};
+document.getElementById('login-btn').onclick=()=>{
+  const email=document.getElementById('login-email').value.trim().toLowerCase(),pw=document.getElementById('login-password').value;
+  if(!email||!pw)return showAuthMsg('E-Mail und Passwort eingeben.');
+  const users=db.get(LS.users,{}),u=users[email];
+  if(!u||u.password!==hash(pw))return showAuthMsg('E-Mail oder Passwort falsch.');
+  loginUser(email);
+};
+function loginUser(email){const users=db.get(LS.users,{});currentUser=users[email];db.set(LS.session,email);authScreen.style.display='none';appScreen.style.display='block';bootApp()}
+function logout(){confirmModal('Abmelden?','Du kannst dich jederzeit wieder anmelden.',()=>{db.del(LS.session);currentUser=null;appScreen.style.display='none';authScreen.style.display='flex';document.getElementById('login-email').value='';document.getElementById('login-password').value='';})}
+(function init(){const email=db.get(LS.session,null);if(email){const users=db.get(LS.users,{});if(users[email]){currentUser=users[email];authScreen.style.display='none';appScreen.style.display='block';bootApp();return}}authScreen.style.display='flex'})();
+
+function bootApp(){
+  const name=currentUser.name,initial=name.charAt(0).toUpperCase();
+  document.getElementById('user-avatar').textContent=initial;
+  document.getElementById('user-name').textContent=name.split(' ')[0];
+  document.getElementById('profile-avatar').textContent=initial;
+  document.getElementById('profile-name').textContent=name;
+  document.getElementById('profile-email').textContent=currentUser.email;
+  renderNotes();renderHistory();updateProfileStats();
+  if(!faceLandmarker&&!modelLoading)initModel();
+}
+
+/* =================== TABS =================== */
+document.querySelectorAll('.nav-item').forEach(item=>{
+  item.onclick=()=>{
+    const tab=item.dataset.tab;
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+    item.classList.add('active');
+    document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+    document.getElementById('tab-'+tab).classList.add('active');
+    window.scrollTo({top:0,behavior:'smooth'});
+    if(tab==='history')renderHistory();
+    if(tab==='notes')renderNotes();
+    if(tab==='profile')updateProfileStats();
+  };
+});
+
+/* =================== TOAST/MODAL =================== */
+const toastEl=document.getElementById('toast');
+function toast(m,t=''){toastEl.textContent=m;toastEl.className='toast show '+t;clearTimeout(toast._t);toast._t=setTimeout(()=>toastEl.classList.remove('show'),2400)}
+const modalBackdrop=document.getElementById('modal-backdrop'),modalContent=document.getElementById('modal-content');
+function confirmModal(title,text,onConfirm,danger=false){modalContent.innerHTML=`<h3>${title}</h3><p>${text}</p><button class="btn ${danger?'btn-danger':'btn-primary'}" id="modal-yes">Bestätigen</button><button class="btn btn-ghost" id="modal-no">Abbrechen</button>`;modalBackdrop.classList.add('active');document.getElementById('modal-yes').onclick=()=>{closeModal();onConfirm()};document.getElementById('modal-no').onclick=closeModal}
+function showModal(html){modalContent.innerHTML=html;modalBackdrop.classList.add('active')}
+function closeModal(){modalBackdrop.classList.remove('active')}
+modalBackdrop.addEventListener('click',e=>{if(e.target===modalBackdrop)closeModal()});
+
+/* =================== MEDIAPIPE =================== */
+const {FaceLandmarker,FilesetResolver}=vision;
+let faceLandmarker=null,modelLoading=false;
+async function initModel(){
+  if(faceLandmarker||modelLoading)return;modelLoading=true;
+  try{
+    const visionResolver=await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm");
+    faceLandmarker=await FaceLandmarker.createFromOptions(visionResolver,{baseOptions:{modelAssetPath:"https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",delegate:"GPU"},runningMode:"IMAGE",numFaces:1});
+  }catch(e){console.error(e);toast('KI-Modell konnte nicht geladen werden.','error')}
+  finally{modelLoading=false}
+}
+
+/* =================== SCAN FLOW =================== */
+const fileInput=document.getElementById('file-input'),uploadZone=document.getElementById('upload-zone'),uploadSec=document.getElementById('upload-section'),analysisSec=document.getElementById('analysis-section'),previewCv=document.getElementById('preview-canvas'),previewCtx=previewCv.getContext('2d'),loadingEl=document.getElementById('loading'),loadingText=document.getElementById('loading-text'),resultsEl=document.getElementById('current-results'),resetBtn=document.getElementById('reset-btn');
+uploadZone.onclick=()=>fileInput.click();
+resetBtn.onclick=()=>{fileInput.value='';uploadSec.style.display='block';analysisSec.style.display='none';resultsEl.innerHTML='';resetBtn.style.display='none';window.scrollTo({top:0,behavior:'smooth'})};
+fileInput.onchange=e=>{
+  const file=e.target.files[0];if(!file)return;
+  if(!faceLandmarker){toast('Modell lädt noch. Kurz warten…','error');initModel();return}
+  const reader=new FileReader();
+  reader.onload=ev=>{const img=new Image();img.onload=()=>runAnalysis(img);img.src=ev.target.result};
+  reader.readAsDataURL(file);
+};
+async function runAnalysis(img){
+  uploadSec.style.display='none';analysisSec.style.display='block';loadingEl.style.display='flex';resultsEl.innerHTML='';resetBtn.style.display='none';loadingText.textContent='30 Metriken werden berechnet…';
+  const maxDim=640;let w=img.width,h=img.height;
+  if(w>maxDim||h>maxDim){const s=maxDim/Math.max(w,h);w=Math.round(w*s);h=Math.round(h*s)}
+  previewCv.width=w;previewCv.height=h;previewCtx.drawImage(img,0,0,w,h);
+  try{
+    const res=faceLandmarker.detect(img);
+    if(!res.faceLandmarks?.length){loadingEl.style.display='none';toast('Kein Gesicht erkannt.','error');uploadSec.style.display='block';analysisSec.style.display='none';return}
+    const lm=res.faceLandmarks[0];
+    drawLandmarks(lm,w,h);
+    const scores=computeAllScores(lm);
+    const overall=weightedOverall(scores);
+    loadingEl.style.display='none';
+    const scan={id:'scan_'+Date.now(),date:Date.now(),overall,scores,thumb:previewCv.toDataURL('image/jpeg',0.5)};
+    saveScan(scan);
+    renderResults(scores,overall);
+  }catch(err){console.error(err);loadingEl.style.display='none';toast('Fehler bei der Analyse.','error');uploadSec.style.display='block';analysisSec.style.display='none'}
+}
+function drawLandmarks(lm,w,h){
+  previewCtx.fillStyle='rgba(139,92,246,.85)';
+  for(const p of lm){previewCtx.beginPath();previewCtx.arc(p.x*w,p.y*h,1.4,0,Math.PI*2);previewCtx.fill()}
+  const jaw=[127,234,93,132,58,172,136,150,149,176,148,152,377,400,378,379,365,397,288,361,323,454,356];
+  previewCtx.strokeStyle='rgba(34,211,238,.7)';previewCtx.lineWidth=1.4;previewCtx.beginPath();
+  jaw.forEach((i,k)=>{const x=lm[i].x*w,y=lm[i].y*h;k?previewCtx.lineTo(x,y):previewCtx.moveTo(x,y)});
+  previewCtx.stroke();
+  [[33,246,161,160,159,158,157,173,133],[263,466,388,387,386,385,384,398,362]].forEach(c=>{
+    previewCtx.strokeStyle='rgba(244,114,182,.75)';previewCtx.beginPath();
+    c.forEach((i,k)=>{const x=lm[i].x*w,y=lm[i].y*h;k?previewCtx.lineTo(x,y):previewCtx.moveTo(x,y)});
+    previewCtx.closePath();previewCtx.stroke();
+  });
+}
+
+/* =================== MATH HELPERS =================== */
+const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const rad2deg=r=>r*180/Math.PI;
+function scoreIdeal(value,ideal,tolerance){return clamp(10-5*(Math.abs(value-ideal)/tolerance),0,10)}
+function scoreRange(value,min,max,softness=1){if(value>=min&&value<=max)return 10;const dev=value<min?min-value:value-max;return clamp(10-dev*softness*5,0,10)}
+
+/* =================== 30 METRIC DEFINITIONS =================== */
+const METRIC_DEFS=[
+  // BALANCE
+  {cat:'Balance',key:'symmetry',emoji:'⚖️',name:'Symmetrie',weight:1.4,ideal:'Bilaterale Balance',color:'#8b5cf6'},
+  {cat:'Balance',key:'thirds',emoji:'📐',name:'Facial Thirds',weight:1.1,ideal:'Gleichmäßige Drittel',color:'#f472b6'},
+  {cat:'Balance',key:'fifths',emoji:'🎯',name:'Facial Fifths',weight:1.1,ideal:'5 gleiche Segmente',color:'#22d3ee'},
+  {cat:'Balance',key:'fwhr',emoji:'🪞',name:'FWHR',weight:1.2,ideal:'Breite/Höhe ~1,9',color:'#f59e0b'},
+  {cat:'Balance',key:'faceRatio',emoji:'🔷',name:'Gesichtsverhältnis',weight:1.0,ideal:'Höhe/Breite ~1,45',color:'#8b5cf6'},
+  {cat:'Balance',key:'convex',emoji:'📊',name:'Konvexität',weight:0.8,ideal:'Profil-Winkel 155-175°',color:'#3b82f6'},
+  // EYES
+  {cat:'Augen',key:'canthalL',emoji:'👁️',name:'Canthal Tilt Links',weight:0.9,ideal:'+5° bis +8°',color:'#22d3ee'},
+  {cat:'Augen',key:'canthalR',emoji:'👁️',name:'Canthal Tilt Rechts',weight:0.9,ideal:'+5° bis +8°',color:'#22d3ee'},
+  {cat:'Augen',key:'eyeShape',emoji:'👀',name:'Augenform (EAR)',weight:1.0,ideal:'Höhe/Breite ~0,32',color:'#8b5cf6'},
+  {cat:'Augen',key:'interocular',emoji:'📏',name:'Augenabstand',weight:1.1,ideal:'Intercanthal ~1,0',color:'#f472b6'},
+  {cat:'Augen',key:'eyeWidthRatio',emoji:'🔍',name:'Augenbreite-Ratio',weight:0.8,ideal:'Augenbreite/Gesicht ~0,21',color:'#10b981'},
+  {cat:'Augen',key:'eyeSymmetry',emoji:'↔️',name:'Augen-Symmetrie',weight:0.9,ideal:'Beide Augen gleich',color:'#22d3ee'},
+  {cat:'Augen',key:'browEye',emoji:'🪶',name:'Brauen-Augen-Abstand',weight:1.0,ideal:'0,045-0,075 Gesichtshöhe',color:'#8b5cf6'},
+  {cat:'Augen',key:'browArch',emoji:'🌿',name:'Brauenwölbung',weight:0.7,ideal:'Natürlich gewölbt',color:'#10b981'},
+  // MIDFACE
+  {cat:'Mittelgesicht',key:'midface',emoji:'✨',name:'Midface Ratio',weight:1.2,ideal:'Augen zu Oberlippe ~1,0',color:'#10b981'},
+  {cat:'Mittelgesicht',key:'cheek',emoji:'🌙',name:'Wangenknochen',weight:1.2,ideal:'0,82-0,92 Gesichtsbreite',color:'#22d3ee'},
+  {cat:'Mittelgesicht',key:'temple',emoji:'🛕',name:'Schläfenbreite',weight:0.8,ideal:'~0,75 Gesichtsbreite',color:'#8b5cf6'},
+  {cat:'Mittelgesicht',key:'nasolabial',emoji:'📐',name:'Nasolabialwinkel',weight:0.8,ideal:'95-105°',color:'#f472b6'},
+  // JAW/CHIN
+  {cat:'Kiefer & Kinn',key:'jaw',emoji:'💎',name:'Gonial-Winkel',weight:1.3,ideal:'125° ±10°',color:'#8b5cf6'},
+  {cat:'Kiefer & Kinn',key:'jawWidth',emoji:'🦴',name:'Kieferbreite',weight:1.0,ideal:'0,68-0,82 Gesichtsbreite',color:'#3b82f6'},
+  {cat:'Kiefer & Kinn',key:'bigonialBizygo',emoji:'📊',name:'Bigonial/Bizygo-Ratio',weight:0.9,ideal:'~0,72',color:'#10b981'},
+  {cat:'Kiefer & Kinn',key:'chinHeight',emoji:'⬇️',name:'Kinnhöhe',weight:0.9,ideal:'1/3 des Untergesichts',color:'#f59e0b'},
+  {cat:'Kiefer & Kinn',key:'mentolabial',emoji:'⏪',name:'Mentolabialwinkel',weight:0.7,ideal:'110-130°',color:'#22d3ee'},
+  // NOSE
+  {cat:'Nase',key:'noseWidth',emoji:'👃',name:'Nasenbreite',weight:0.9,ideal:'~0,25 Gesichtsbreite',color:'#f472b6'},
+  {cat:'Nase',key:'nasalIndex',emoji:'📉',name:'Nasal-Index',weight:0.8,ideal:'Breite/Höhe ~0,7',color:'#8b5cf6'},
+  {cat:'Nase',key:'noseLength',emoji:'📏',name:'Nasenlänge',weight:0.8,ideal:'~1/3 des Mittelgesichts',color:'#10b981'},
+  {cat:'Nase',key:'noseMouth',emoji:'👄',name:'Nase-zu-Mund',weight:0.9,ideal:'Mund ~1,6× Nase',color:'#f59e0b'},
+  // MOUTH/LIPS
+  {cat:'Mund & Lippen',key:'lip',emoji:'💋',name:'Lippenverhältnis',weight:1.0,ideal:'Ober/Unter ~0,62',color:'#10b981'},
+  {cat:'Mund & Lippen',key:'upperLip',emoji:'⬆️',name:'Oberlippenhöhe',weight:0.8,ideal:'~0,02 Gesichtshöhe',color:'#8b5cf6'},
+  {cat:'Mund & Lippen',key:'mouthWidth',emoji:'↔️',name:'Mundbreite',weight:0.8,ideal:'~0,35 Gesichtsbreite',color:'#22d3ee'},
+];
+
+/* =================== COMPUTATION =================== */
+function computeAllScores(lm){
+  const L=i=>lm[i];
+  const mid={x:(L(10).x+L(152).x)/2,y:(L(10).y+L(152).y)/2};
+  const faceW=dist(L(234),L(454));
+  const faceH=dist(L(10),L(152));
+  const angAt=(p,a,b)=>{
+    const v1={x:lm[a].x-lm[p].x,y:lm[a].y-lm[p].y},v2={x:lm[b].x-lm[p].x,y:lm[b].y-lm[p].y};
+    const dot=v1.x*v2.x+v1.y*v2.y,m=Math.hypot(v1.x,v1.y)*Math.hypot(v2.x,v2.y);
+    return rad2deg(Math.acos(clamp(dot/m,-1,1)));
+  };
+  const S={};
+
+  // 1. Symmetry (13 pairs)
+  const symPairs=[[33,263],[133,362],[61,291],[234,454],[116,345],[172,397],[70,300],[105,334],[50,280],[143,372],[129,358],[36,266],[205,425]];
+  let symErr=0;
+  for(const[l,r]of symPairs){symErr+=Math.abs(Math.abs(L(l).x-mid.x)-Math.abs(L(r).x-mid.x))}
+  symErr/=symPairs.length;
+  S.symmetry=clamp(10*(1-symErr/(faceW*0.09)),0,10);
+
+  // 2. Facial Thirds
+  const hairline=L(10).y,browMid=(L(105).y+L(334).y)/2,noseBase=L(2).y,chinY=L(152).y;
+  const t1=browMid-hairline,t2=noseBase-browMid,t3=chinY-noseBase,total=t1+t2+t3;
+  const thirdsDev=(Math.abs(t1/total-0.333)+Math.abs(t2/total-0.333)+Math.abs(t3/total-0.333))/3;
+  S.thirds=clamp(10*(1-thirdsDev/0.12),0,10);
+
+  // 3. Facial Fifths
+  const fifths=[L(234).x,L(33).x,L(133).x,L(362).x,L(263).x,L(454).x];
+  const fifthLens=[];for(let i=0;i<5;i++)fifthLens.push(fifths[i+1]-fifths[i]);
+  const fifthAvg=fifthLens.reduce((a,b)=>a+b,0)/5;
+  const fifthDev=fifthLens.reduce((a,b)=>a+Math.abs(b-fifthAvg),0)/5;
+  S.fifths=clamp(10*(1-fifthDev/(fifthAvg*0.9)),0,10);
+
+  // 4. FWHR
+  const fw=dist(L(234),L(454)),fh=dist(L(9),L(13));
+  S.fwhr=scoreIdeal(fw/fh,1.9,0.35);
+
+  // 5. Face Ratio (H/W)
+  S.faceRatio=scoreIdeal(faceH/faceW,1.45,0.35);
+
+  // 6. Facial Convexity
+  S.convex=scoreRange(angAt(1,9,152),155,175,0.35);
+
+  // 7. Canthal Tilt L
+  const tiltL=rad2deg(Math.atan2(L(133).y-L(33).y,Math.abs(L(33).x-L(133).x)));
+  S.canthalL=scoreIdeal(tiltL,6,10);
+
+  // 8. Canthal Tilt R
+  const tiltR=rad2deg(Math.atan2(L(362).y-L(263).y,Math.abs(L(263).x-L(362).x)));
+  S.canthalR=scoreIdeal(tiltR,6,10);
+
+  // 9. Eye Aspect Ratio (avg)
+  const earL=dist(L(159),L(145))/dist(L(33),L(133));
+  const earR=dist(L(386),L(374))/dist(L(263),L(362));
+  S.eyeShape=scoreIdeal((earL+earR)/2,0.32,0.14);
+
+  // 10. Interocular
+  const eyeWidthL=dist(L(33),L(133)),eyeWidthR=dist(L(263),L(362)),eyeWidthAvg=(eyeWidthL+eyeWidthR)/2;
+  S.interocular=scoreIdeal(dist(L(133),L(362))/eyeWidthAvg,1.0,0.28);
+
+  // 11. Eye Width Ratio (avg eye width / face width)
+  S.eyeWidthRatio=scoreIdeal(eyeWidthAvg/faceW,0.21,0.05);
+
+  // 12. Eye Symmetry (L vs R width and height)
+  const widthDiff=Math.abs(eyeWidthL-eyeWidthR)/eyeWidthAvg;
+  const heightDiff=Math.abs(dist(L(159),L(145))-dist(L(386),L(374)))/Math.max(dist(L(159),L(145)),0.001);
+  S.eyeSymmetry=clamp(10*(1-(widthDiff+heightDiff)/0.3),0,10);
+
+  // 13. Brow-Eye Distance
+  const browY=(L(105).y+L(334).y)/2,eyeY=(L(159).y+L(386).y)/2;
+  S.browEye=scoreRange((eyeY-browY)/faceH,0.045,0.075,1.4);
+
+  // 14. Brow Arch (peak vs inner/outer height)
+  const browPeakY=Math.min(L(107).y,L(336).y);
+  const browInnerY=(L(105).y+L(334).y)/2;
+  const browOuterY=(L(46).y+L(276).y)/2;
+  const archHeight=browInnerY-browPeakY;
+  const archRatio=archHeight/Math.abs(browInnerY-browOuterY||0.01);
+  S.browArch=scoreRange(archRatio,0.3,0.9,1.0);
+
+  // 15. Midface Ratio
+  const pupilY=(L(468).y+L(473).y)/2,midfaceLen=L(13).y-pupilY;
+  S.midface=scoreIdeal(midfaceLen/eyeWidthAvg,1.0,0.25);
+
+  // 16. Cheekbone
+  S.cheek=scoreRange(dist(L(116),L(345))/faceW,0.82,0.92,1.6);
+
+  // 17. Temple Width
+  S.temple=scoreRange(dist(L(118),L(347))/faceW,0.7,0.82,1.5);
+
+  // 18. Nasolabial Angle
+  S.nasolabial=scoreRange(angAt(2,L(1),L(13)),95,105,0.25);
+
+  // 19. Gonial / Jaw Angle
+  const jawL=angAt(172,152,234),jawR=angAt(397,152,454);
+  S.jaw=scoreIdeal((jawL+jawR)/2,125,22);
+
+  // 20. Jaw Width
+  const jawW=dist(L(172),L(397));
+  S.jawWidth=scoreRange(jawW/faceW,0.68,0.82,1.5);
+
+  // 21. Bigonial / Bizygomatic
+  const bigonial=dist(L(172),L(397)),bizygo=dist(L(116),L(345));
+  S.bigonialBizygo=scoreIdeal(bigonial/bizygo,0.72,0.15);
+
+  // 22. Chin Height Ratio (lip line to chin vs face height)
+  const lowerLipBottom=L(14).y;
+  const chinHeight=(L(152).y-lowerLipBottom)/faceH;
+  S.chinHeight=scoreRange(chinHeight,0.12,0.20,1.4);
+
+  // 23. Mentolabial Angle (chin-lip junction)
+  S.mentolabial=scoreRange(angAt(17,L(14),L(152)),110,130,0.25);
+
+  // 24. Nose Width Ratio
+  const noseW=dist(L(129),L(358));
+  S.noseWidth=scoreRange(noseW/faceW,0.22,0.28,1.6);
+
+  // 25. Nasal Index (width / length)
+  const noseLen=dist(L(168),L(2));
+  S.nasalIndex=scoreIdeal(noseW/noseLen,0.7,0.2);
+
+  // 26. Nose Length Ratio (nasion to subnasale / midface height)
+  const nasionY=L(168).y;
+  const noseLengthRatio=(L(2).y-nasionY)/(L(2).y-L(9).y||0.01);
+  S.noseLength=scoreRange(noseLengthRatio,0.55,0.75,1.2);
+
+  // 27. Nose-to-Mouth
+  const mouthW=dist(L(61),L(291));
+  S.noseMouth=scoreIdeal(mouthW/noseW,1.6,0.4);
+
+  // 28. Lip Ratio
+  const upperLipH=dist(L(13),L(17)),lowerLipH=dist(L(17),L(14));
+  S.lip=scoreIdeal(upperLipH/lowerLipH,0.62,0.22);
+
+  // 29. Upper Lip Height Ratio
+  S.upperLip=scoreRange(upperLipH/faceH,0.015,0.028,2.0);
+
+  // 30. Mouth Width Ratio
+  S.mouthWidth=scoreRange(mouthW/faceW,0.32,0.38,1.6);
+
+  return S;
+}
+
+function weightedOverall(scores){
+  let num=0,den=0;
+  for(const d of METRIC_DEFS){num+=(scores[d.key]||0)*d.weight;den+=d.weight}
+  return num/den;
+}
+
+/* =================== TIER / COLORS =================== */
+function getTier(s){
+  if(s>=9.0)return{name:'Elite',emoji:'👑',color:'#f59e0b',desc:'Außergewöhnliche Harmonie. Top-1 % der Gesichtsproportionen.'};
+  if(s>=8.0)return{name:'Exceptional',emoji:'💎',color:'#22d3ee',desc:'Sehr attraktive Proportionen. Deutlich über dem Durchschnitt.'};
+  if(s>=7.0)return{name:'Attractive',emoji:'✨',color:'#8b5cf6',desc:'Ansprechende Harmonie. Überdurchschnittlich ausgeprägte Features.'};
+  if(s>=6.0)return{name:'Above Average',emoji:'🌟',color:'#10b981',desc:'Gute Balance. Mehrere starke Merkmale vorhanden.'};
+  if(s>=5.0)return{name:'Average',emoji:'⭐',color:'#8b5cf6',desc:'Solide Proportionen. Einzelne Werte mit Potenzial.'};
+  if(s>=4.0)return{name:'Below Average',emoji:'🔄',color:'#f59e0b',desc:'Einige Metriken weichen ab. Verbesserungspotenzial.'};
+  if(s>=3.0)return{name:'Developing',emoji:'📈',color:'#f59e0b',desc:'Mehrere Merkmale abweichend – Fokus auf Stärken lohnt sich.'};
+  return{name:'Foundation',emoji:'🧱',color:'#ef4444',desc:'Deutliche Abweichungen. Fokus auf Pflege und Styling.'};
+}
+function scoreColor(s){if(s>=8.5)return '#10b981';if(s>=7)return '#22d3ee';if(s>=5.5)return '#8b5cf6';if(s>=4)return '#f59e0b';return '#ef4444'}
+function scoreStatus(s){if(s>=8.5)return 'Exzellent';if(s>=7)return 'Sehr gut';if(s>=5.5)return 'Gut';if(s>=4)return 'Okay';return 'Ausbaufähig'}
+
+/* =================== RENDER RESULTS =================== */
+function renderResults(scores,overall){
+  const tier=getTier(overall);
+  const sorted=Object.entries(scores).sort((a,b)=>b[1]-a[1]);
+  const best=sorted[0],worst=sorted[sorted.length-1];
+  const nameOf=k=>METRIC_DEFS.find(d=>d.key===k)?.name||k;
+  const emojiOf=k=>METRIC_DEFS.find(d=>d.key===k)?.emoji||'';
+  const catOf=k=>METRIC_DEFS.find(d=>d.key===k)?.cat||'';
+
+  let html=`
+    <div class="hero">
+      <div class="ring-wrap">
+        <svg viewBox="0 0 120 120">
+          <defs><linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="${tier.color}"/><stop offset="100%" stop-color="#22d3ee"/></linearGradient></defs>
+          <circle class="ring-bg" cx="60" cy="60" r="52"/>
+          <circle class="ring-fg" id="ring-fg" cx="60" cy="60" r="52" stroke-dasharray="326.7" stroke-dashoffset="326.7"/>
+        </svg>
+        <div class="ring-value"><span id="score-count">0.0</span></div>
+      </div>
+      <div class="tier-badge" style="color:${tier.color}"><span class="dot"></span>${tier.emoji} ${tier.name}</div>
+      <div class="tier-desc">${tier.desc}</div>
+    </div>
+
+    <div class="section-title">Insights</div>
+    <div class="insight"><span class="insight-icon">${emojiOf(best[0])}</span><div><div class="insight-label">Stärkstes Merkmal</div><div class="insight-text"><strong>${nameOf(best[0])}</strong> mit ${best[1].toFixed(1)}/10</div></div></div>
+    <div class="insight"><span class="insight-icon">${emojiOf(worst[0])}</span><div><div class="insight-label">Entwicklungspotenzial</div><div class="insight-text"><strong>${nameOf(worst[0])}</strong> mit ${worst[1].toFixed(1)}/10</div></div></div>
+    <div class="insight"><span class="insight-icon">💡</span><div><div class="insight-label">Hinweis</div><div class="insight-text">Tips für alle 30 Metriken findest du im <strong>Tips-Tab</strong>.</div></div></div>
+  `;
+
+  // Group metrics by category
+  const categories={};
+  METRIC_DEFS.forEach(d=>{if(!categories[d.cat])categories[d.cat]=[];categories[d.cat].push(d)});
+
+  let globalIdx=0;
+  for(const cat of Object.keys(categories)){
+    html+=`<div class="category-head">${cat}</div>`;
+    for(const def of categories[cat]){
+      const s=scores[def.key];
+      const color=scoreColor(s);
+      html+=`
+        <div class="metric-card" style="animation-delay:${globalIdx*0.02}s">
+          <div class="metric-top">
+            <div class="metric-left"><span class="metric-emoji">${def.emoji}</span><span class="metric-name">${def.name}</span></div>
+            <div class="metric-right"><span class="metric-score" style="color:${color}">${s.toFixed(1)}</span><span class="metric-max">/10</span></div>
+          </div>
+          <div class="bar"><div class="bar-fill" data-w="${(s*10).toFixed(1)}" style="background:linear-gradient(90deg,${color},${color}aa);color:${color}"></div></div>
+          <div class="metric-desc">${def.ideal} · <span style="color:${color};font-weight:700">${scoreStatus(s)}</span></div>
+        </div>`;
+      globalIdx++;
+    }
+  }
+
+  resultsEl.innerHTML=html;
+  resetBtn.style.display='block';
+  resultsEl.scrollIntoView({behavior:'smooth',block:'start'});
+
+  const circ=2*Math.PI*52;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    const el=document.getElementById('ring-fg');
+    if(el)el.setAttribute('stroke-dashoffset',circ*(1-overall/10));
+  }));
+  const countEl=document.getElementById('score-count');
+  const start=performance.now();
+  (function tick(t){const p=clamp((t-start)/1400,0,1),e=1-Math.pow(1-p,3);countEl.textContent=(overall*e).toFixed(1);if(p<1)requestAnimationFrame(tick)})(start);
+  setTimeout(()=>document.querySelectorAll('.bar-fill').forEach(b=>b.style.width=b.dataset.w+'%'),200);
+}
+
+/* =================== SCAN STORAGE =================== */
+function saveScan(s){const k=LS.scans(currentUser.email),l=db.get(k,[]);l.unshift(s);if(l.length>50)l.length=50;db.set(k,l)}
+function renderHistory(){
+  const list=db.get(LS.scans(currentUser.email),[]),c=document.getElementById('history-list');
+  if(!list.length){c.innerHTML=`<div class="empty-state"><span class="big">📊</span>Noch keine Analysen.<br>Starte deinen ersten Scan.</div>`;return}
+  c.innerHTML=list.map((s,i)=>{const t=getTier(s.overall),d=new Date(s.date).toLocaleString('de-DE',{day:'2-digit',month:'short',year:'2-digit',hour:'2-digit',minute:'2-digit'});
+    return `<div class="hist-item" style="animation-delay:${i*0.03}s" onclick="openScanDetail('${s.id}')">
+      <div class="hist-score" style="background:linear-gradient(135deg,${t.color},${t.color}99)">${s.overall.toFixed(1)}</div>
+      <div class="hist-info"><div class="tier">${t.emoji} ${t.name}</div><div class="date">${d}</div></div>
+      <img class="hist-thumb" src="${s.thumb}" alt="">
+    </div>`}).join('');
+}
+window.openScanDetail=function(id){
+  const scan=db.get(LS.scans(currentUser.email),[]).find(s=>s.id===id);if(!scan)return;
+  let html=`<h3>Scan-Details</h3><p>${new Date(scan.date).toLocaleString('de-DE')}</p>
+    <img src="${scan.thumb}" class="detail-img" alt="">
+    <div style="text-align:center;margin-bottom:14px">
+      <span style="font-size:42px;font-weight:800;background:linear-gradient(135deg,#fff,#22d3ee);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">${scan.overall.toFixed(1)}</span>
+      <span style="color:var(--muted);font-size:14px;font-weight:600"> / 10</span>
+    </div>`;
+  const cats={};METRIC_DEFS.forEach(d=>{if(!cats[d.cat])cats[d.cat]=[];cats[d.cat].push(d)});
+  for(const cat of Object.keys(cats)){
+    html+=`<div class="category-head">${cat}</div>`;
+    for(const d of cats[cat]){
+      const s=scan.scores[d.key],color=scoreColor(s);
+      html+=`<div class="metric-card"><div class="metric-top">
+        <div class="metric-left"><span class="metric-emoji">${d.emoji}</span><span class="metric-name">${d.name}</span></div>
+        <div class="metric-right"><span class="metric-score" style="color:${color}">${s.toFixed(1)}</span><span class="metric-max">/10</span></div>
+      </div><div class="bar"><div class="bar-fill" style="width:${(s*10)}%;background:linear-gradient(90deg,${color},${color}aa);color:${color}"></div></div></div>`;
+    }
+  }
+  html+=`<button class="btn btn-ghost" onclick="closeModal()">Schließen</button>`;
+  showModal(html);
+};
+function clearHistory(){confirmModal('Scan-Verlauf löschen?','Alle bisherigen Analysen werden dauerhaft entfernt.',()=>{db.del(LS.scans(currentUser.email));renderHistory();updateProfileStats();toast('Verlauf gelöscht.','success')},true)}
+function updateProfileStats(){
+  const scans=db.get(LS.scans(currentUser.email),[]),notes=db.get(LS.notes(currentUser.email),[]);
+  document.getElementById('stat-scans').textContent=scans.length;
+  document.getElementById('stat-notes').textContent=notes.length;
+  if(scans.length){document.getElementById('stat-avg').textContent=(scans.reduce((a,b)=>a+b.overall,0)/scans.length).toFixed(1);document.getElementById('stat-best').textContent=Math.max(...scans.map(s=>s.overall)).toFixed(1)}
+  else{document.getElementById('stat-avg').textContent='–';document.getElementById('stat-best').textContent='–'}
+}
+
+/* =================== NOTES =================== */
+let editingNoteId=null;
+function renderNotes(){
+  const list=db.get(LS.notes(currentUser.email),[]),c=document.getElementById('notes-list');
+  if(!list.length){c.innerHTML=`<div class="empty-state"><span class="big">📝</span>Noch keine Notizen.</div>`;return}
+  c.innerHTML=list.map((n,i)=>{const d=new Date(n.date).toLocaleString('de-DE',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+    return `<div class="note-item" style="animation-delay:${i*0.03}s">
+      <div class="note-meta"><span>${d}${n.edited?' · bearbeitet':''}</span></div>
+      <div class="note-text">${escapeHtml(n.text)}</div>
+      <div class="note-btns"><button onclick="editNote('${n.id}')">Bearbeiten</button><button class="del" onclick="deleteNote('${n.id}')">Löschen</button></div>
+    </div>`}).join('');
+}
+function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+document.getElementById('note-save').onclick=()=>{
+  const text=document.getElementById('note-input').value.trim();if(!text)return toast('Notiz ist leer.','error');
+  const k=LS.notes(currentUser.email),list=db.get(k,[]);
+  if(editingNoteId){const i=list.findIndex(n=>n.id===editingNoteId);if(i>=0){list[i].text=text;list[i].edited=true;list[i].date=Date.now()}editingNoteId=null;document.getElementById('note-cancel').style.display='none';toast('Notiz aktualisiert.','success')}
+  else{list.unshift({id:'note_'+Date.now(),text,date:Date.now()});toast('Notiz gespeichert.','success')}
+  db.set(k,list);document.getElementById('note-input').value='';renderNotes();updateProfileStats();
+};
+document.getElementById('note-cancel').onclick=()=>{editingNoteId=null;document.getElementById('note-input').value='';document.getElementById('note-cancel').style.display='none'};
+window.editNote=function(id){const n=db.get(LS.notes(currentUser.email),[]).find(x=>x.id===id);if(!n)return;editingNoteId=id;document.getElementById('note-input').value=n.text;document.getElementById('note-cancel').style.display='block';document.getElementById('note-input').focus();window.scrollTo({top:0,behavior:'smooth'})};
+window.deleteNote=function(id){confirmModal('Notiz löschen?','Wird dauerhaft entfernt.',()=>{db.set(LS.notes(currentUser.email),db.get(LS.notes(currentUser.email),[]).filter(n=>n.id!==id));renderNotes();updateProfileStats();toast('Notiz gelöscht.','success')},true)};
+
+/* =================== TIPS FOR ALL 30 =================== */
+const TIPS={
+  symmetry:{what:'Symmetrie beschreibt die Spiegelgleichheit beider Gesichtshälften. Kleine Abweichungen sind völlig normal.',improve:['Auf dem Rücken schlafen statt auf der Seite','Beidseitig kauen für gleichmäßige Kaumuskeln','Gesichtsmassage mit Lymphdrainage gegen Schwellungen','Aufrechte Kopf- und Körperhaltung','Ausreichend Wasser trinken gegen Einlagerungen','Tägliche Sonnencreme für gleichmäßigen Teint']},
+  thirds:{what:'Klassisch wird das Gesicht in 3 gleich hohe Drittel geteilt: Stirn, Mittelgesicht, Untergesicht.',improve:['Frisur mit Volumen oben verlängert das obere Drittel','Bart gezielt für mehr Länge im unteren Drittel','Augenbrauen natürlich formen – nicht zu dünn','Bei hoher Stirn: Mittelscheitel vermeiden, Pony nutzen','Lippen betonen für mehr Präsenz unten']},
+  fifths:{what:'Das Gesicht sollte horizontal in 5 gleich breite Segmente teilbar sein. Jedes Auge nimmt etwa 1/5 ein.',improve:['Augenbrauen symmetrisch zupfen für optische Balance','Frisur mit Seitenscheitel verschiebt Fokus','Brillen passend zur Augenposition wählen','Make-up-Contouring für optische Verschiebung','Nicht dauerhaft auf einer Seite kauen']},
+  fwhr:{what:'Facial Width-to-Height Ratio – Gesichtsbreite geteilt durch Höhe zwischen Brauen und Oberlippe. Ideal ~1,9.',improve:['Gewicht halten – Körperfett beeinflusst FWHR stark','Kiefermuskulatur durch Kauen trainieren','Bei schmalem Gesicht: Bart mit seitlicher Breite','Bei breitem Gesicht: Höhe durch Frisur-Volumen','Körperhaltung: Kinn leicht anheben']},
+  faceRatio:{what:'Verhältnis von Gesichtshöhe zu Gesichtsbreite. Ideal ~1,45 – Gesicht ist etwa 1,5× so lang wie breit.',improve:['Bei rundem Gesicht: Höhe durch Frisur betonen','Bei langem Gesicht: seitliches Volumen in der Frisur','Bei breitem Gesicht: Kinn leicht anheben','Bart fügt Länge hinzu oder verkürzt optisch','Brillenform passend zur Gesichtsform wählen']},
+  convex:{what:'Gesichtskonvexität misst den Winkel von Stirn zu Kinn über die Nase. Ideal 155-175° – gerades, harmonisches Profil.',improve:['Mundhaltung: Zunge am Gaumen, Lippen geschlossen','Mewing korrigiert langfristig die Profillinie','Nicht auf dem Bauch schlafen','Bei Vorbiss/Überbiss: Zahnarzt konsultieren','Bart für Profil-Balance gezielt einsetzen']},
+  canthalL:{what:'Winkel des linken äußeren Augenwinkels. Leicht positiv (+5° bis +8°) gilt als attraktiv.',improve:['Ausreichend Schlaf – Müdigkeit senkt Winkel','Augenbrauen leicht nach oben zupfen','Wimpernzange + Mascara öffnet den Blick','Augencreme mit Koffein gegen Schwellungen','Blinzeln bewusst trainieren']},
+  canthalR:{what:'Winkel des rechten äußeren Augenwinkels. Ideal leicht positiv.',improve:['Gleichmäßig auf beiden Seiten schlafen','Augenbrauen rechts symmetrisch formen','Wimpernzange rechts besonders sorgfältig','Augencreme mit Koffein verwenden','Bildschirmpausen einhalten']},
+  eyeShape:{what:'Eye Aspect Ratio – Höhe zu Breite der Augen. Ideal ~0,32 für offene, ausgeruhte Augen.',improve:['7–9 Stunden Schlaf – wichtigster Faktor','Wimpernzange für sofort offeneren Blick','Augenbrauen leicht über den Augen formen','Kaltes Wasser morgens gegen Schwellungen','Bildschirmpause und Blinzeltraining']},
+  interocular:{what:'Abstand zwischen den Augen (Intercanthal) zur Augenbreite. Ideal ~1,0.',improve:['Augenbrauen nicht zu weit außen zupfen','Wimperntusche außen betont – optisch weiter','Innere Augenwinkel mit Highlighter aufhellen','Brillen passend zur Augenposition wählen','Frisur mit Seitenscheitel verschiebt Optik']},
+  eyeWidthRatio:{what:'Augenbreite im Verhältnis zur Gesichtsbreite. Ideal ~0,21.',improve:['Wimpernzange für optische Breite','Eyeliner außen verlängert optisch','Brauen minimalistisch halten','Bei schmalen Augen: rauchiges Make-up','Augenbrauenabstand passend halten']},
+  eyeSymmetry:{what:'Wie symmetrisch beide Augen in Größe und Öffnung sind.',improve:['Gleichmäßig auf beiden Seiten schlafen','Bewusst symmetrisch blinzeln','Augenbrauen beidseitig gleich formen','Nicht ständig auf einen Bildschirm schauen','Mimik vor dem Spiegel bewusst trainieren']},
+  browEye:{what:'Abstand zwischen Brauen und Augen. Ideal 0,045–0,075 der Gesichtshöhe.',improve:['Brauen nur minimal zupfen','Brauen mit Puder leicht auffüllen','Brauengel für gepflegte Form','Bei hohem Abstand: Brauen leicht senken','Wachsen lassen dauert 4–6 Wochen – Geduld']},
+  browArch:{what:'Wölbung der Augenbrauen. Natürliche, sanfte Wölbung gilt als attraktiv.',improve:['Natürliche Form beibehalten','Nicht zu dünn zupfen','Brauen mit Stift leicht nachzeichnen','Augenbrauen-Gel für Struktur','Regelmäßig leicht nachformen']},
+  midface:{what:'Midface Ratio – Länge des Mittelgesichts zu Augenbreite. Ideal ~1,0.',improve:['Lächeln trainieren – hebt Wangen optisch','Bei langem Mittelgesicht: Pony tragen','Rouge auf Wangenknochen setzen','Nicht zu tief in die Kamera schauen','Ausreichend Schlaf für straffe Konturen']},
+  cheek:{what:'Wangenknochen-Definition im Verhältnis zur Gesichtsbreite. Ideal 0,82-0,92.',improve:['Körperfett reduzieren lässt Wangen hervortreten','Gua Sha Massage für Definition','Rouge auf Wangenknochen (Make-up)','Kaugummi trainiert Wangenmuskeln','Aufrechte Kopfhaltung hebt Wangen']},
+  temple:{what:'Breite der Schläfen im Verhältnis zur Gesichtsbreite. Ideal ~0,75.',improve:['Frisur mit Volumen an den Seiten','Brillen mit breitem Rahmen vermeiden','Massage der Schläfenmuskeln','Nicht ständig die Stirn runzeln','Ausreichend Schlaf gegen eingefallene Schläfen']},
+  nasolabial:{what:'Winkel zwischen Oberlippe und Nase. Ideal 95-105°.',improve:['Gesichtsmassage für Elastizität','Nicht auf den Lippen kauen','Ausreichend Wasser trinken','Sonnencreme für Kollagen-Erhalt','Feuchtigkeitspflege der Lippen']},
+  jaw:{what:'Gonial-Winkel am Unterkiefer. Ideal 120-130°.',improve:['Mewing: Zunge am Gaumen, 24/7','Mastic Gum kauen für Masseter','Körperfett reduzieren lässt Kontur hervortreten','Wasser trinken für straffe Haut','Bart gezielt für Kieferkante schneiden','Aufrechte Kopfhaltung']},
+  jawWidth:{what:'Kieferbreite zur gesamten Gesichtsbreite. Ideal 0,68-0,82.',improve:['Bilateral kauen für Symmetrie','Bei schmalem Kiefer Bart breiter tragen','Bei breitem Kiefer Bart schmaler halten','Nicht immer auf einer Seite schlafen','Mewing für langfristige Formung']},
+  bigonialBizygo:{what:'Verhältnis Kieferbreite zu Wangenbreite. Ideal ~0,72.',improve:['Gewicht halten für optimale Balance','Kiefermuskeln durch Kauen trainieren','Bart gezielt formen','Bei zu breitem Kiefer: Masseter nicht überlasten','Bei zu schmalem: Kiefertraining']},
+  chinHeight:{what:'Höhe des Kinns unter der Unterlippe. Ideal ~1/3 des Untergesichts.',improve:['Bei kurzem Kinn: Bartpflege vermeiden','Bei langem Kinn: Bart trägt optisch ab','Mundhaltung trainieren','Zahnstellung prüfen lassen','Profil bewusst halten']},
+  mentolabial:{what:'Winkel zwischen Unterlippe und Kinn. Ideal 110-130°.',improve:['Nicht auf den Lippen kauen','Mundmuskulatur trainieren','Bei Problemen Zahnarzt konsultieren','Zungenhaltung beachten','Aufrechte Haltung']},
+  noseWidth:{what:'Breite der Nase im Verhältnis zur Gesichtsbreite. Ideal 0,22-0,28.',improve:['Kontur-Make-up an den Nasenseiten','Highlighter auf Nasenrücken statt Breite','Bei zu breiter Nase: Nasenkorrektur konsultieren','Bei zu schmaler: Brille wählen die Breite gibt','Nicht ständig Nase rümpfen']},
+  nasalIndex:{what:'Breite zu Höhe der Nase. Ideal ~0,7.',improve:['Nicht an Nase ziehen','Nasenform mit Kontur-Make-up optimieren','Bei Problemen HNO konsultieren','Aufrechte Kopfhaltung','Gesichtspflege für straffe Konturen']},
+  noseLength:{what:'Länge der Nase im Verhältnis zum Mittelgesicht.',improve:['Nicht an Nase ziehen','Gesichts-Yoga für Spannung','Aufrechte Haltung','Nicht ständig nach unten schauen','Bei Problemen Profil prüfen lassen']},
+  noseMouth:{what:'Verhältnis Mundbreite zu Nasenbreite. Ideal ~1,6.',improve:['Lippen mit Kontur betonen','Bei breiter Nase: Mund optisch breiter','Kontur-Make-up an Nase','Lächeln trainieren','Bewusst Lippenpflege betreiben']},
+  lip:{what:'Verhältnis Ober- zu Unterlippe. Ideal ~0,62.',improve:['Lippenbalsam täglich verwenden','Peeling + Feuchtigkeit für Volumen','Zucker und Alkohol reduzieren','Ausreichend Wasser trinken','Nicht auf Lippen kauen oder lecken']},
+  upperLip:{what:'Höhe der Oberlippe im Verhältnis zur Gesichtshöhe.',improve:['Nicht an Oberlippe ziehen','Feuchtigkeitspflege intensivieren','Lippenmassage für Durchblutung','Bei zu dünner: Lippenstift mit Aufbau','Beim Atmen durch die Nase atmen']},
+  mouthWidth:{what:'Breite des Mundes im Verhältnis zur Gesichtsbreite. Ideal 0,32-0,38.',improve:['Lippen betonen für optische Breite','Bei schmalem Mund: Lippenstift überschreiten','Lächeln trainieren','Kieferhaltung bewusst einnehmen','Aufrechte Gesichtsmuskulatur']}
+};
+
+/* =================== TIP FILTER =================== */
+let currentTipCat='Alle';
+function renderTipFilter(){
+  const cats=['Alle',...new Set(METRIC_DEFS.map(d=>d.cat))];
+  document.getElementById('tip-filter').innerHTML=cats.map(c=>`<button data-cat="${c}" class="${c===currentTipCat?'active':''}">${c}</button>`).join('');
+  document.querySelectorAll('#tip-filter button').forEach(b=>b.onclick=()=>{currentTipCat=b.dataset.cat;renderTipFilter();renderTips()});
+}
+function renderTips(){
+  const container=document.getElementById('tips-list');
+  const filtered=currentTipCat==='Alle'?METRIC_DEFS:METRIC_DEFS.filter(d=>d.cat===currentTipCat);
+  container.innerHTML=filtered.map(d=>{
+    const t=TIPS[d.key];if(!t)return '';
+    return `<div class="tip-accordion" data-tip="${d.key}">
+      <div class="tip-head" onclick="toggleTip('${d.key}')">
+        <span class="emoji">${d.emoji}</span>
+        <div class="title-wrap"><div class="title">${d.name}</div><div class="sub">${t.improve.length} Tipps · ${d.cat}</div></div>
+        <span class="chev">▼</span>
+      </div>
+      <div class="tip-body"><div class="tip-inner">
+        <div class="tip-block"><h4>Was ist das?</h4><p>${t.what}</p></div>
+        <div class="tip-block"><h4>So verbesserst du es</h4><ul>${t.improve.map(x=>`<li>${x}</li>`).join('')}</ul></div>
+      </div></div>
+    </div>`;
+  }).join('');
+}
+window.toggleTip=function(key){
+  const el=document.querySelector(`.tip-accordion[data-tip="${key}"]`);if(!el)return;
+  const wasOpen=el.classList.contains('open');
+  document.querySelectorAll('.tip-accordion').forEach(a=>a.classList.remove('open'));
+  if(!wasOpen)el.classList.add('open');
+};
+
+/* =================== EXPORT =================== */
+window.exportData=function(){
+  const data={user:{name:currentUser.name,email:currentUser.email},scans:db.get(LS.scans(currentUser.email),[]),notes:db.get(LS.notes(currentUser.email),[]),exported:new Date().toISOString()};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=`aesthetic-pro-${currentUser.email}-${Date.now()}.json`;a.click();
+  URL.revokeObjectURL(url);toast('Daten exportiert.','success');
+};
+
+/* =================== INIT =================== */
+renderTipFilter();
+renderTips();
+window.addEventListener('load',()=>{if(currentUser&&!faceLandmarker)initModel()});
+</script>
+</body>
+</html>
